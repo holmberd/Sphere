@@ -31,12 +31,12 @@ var playState = {
 		    proximitySize: 300,
 		    proximityCircle: null,
 		    init: function () {
-		        this.sprite = game.add.sprite(game.world.centerX + 400, game.world.centerY + 400, 'ship');
+		        this.sprite = game.add.sprite(game.world.centerX + 200, game.world.centerY + 200, 'ship');
 		        game.physics.p2.enable(this.sprite, false);
 		        this.sprite.health = this.hp;
 		        this.sprite.scale.setTo(this.shipScale, this.shipScale);
 		        this.sprite.body.setCircle(50*this.shipScale);
-		        this.sprite.body.collideWorldBounds = true;
+		        this.sprite.body.collideWorldBounds = false;
 		        this.sprite.body.setCollisionGroup(playState.collision.ship);
 		        this.sprite.body.collides(playState.collision.boss, this.collision, this);
 		        this.proximityCircle = new Phaser.Circle(this.sprite.body.x, this.sprite.body.y, this.proximitySize);
@@ -98,7 +98,7 @@ var playState = {
                     sprite.anchor.x = 0.5;
                     sprite.anchor.y = 0.5;
                     sprite.body.mass = 0.01;
-                    sprite.body.collideWorldBounds = true;
+                    sprite.body.collideWorldBounds = false;
                     sprite.body.setCollisionGroup(playState.collision.bullet);
                     //sprite.body.collides(collision.boss);
                     sprite.body.collides(playState.collision.boss, playState.bullet.collision, this);
@@ -162,13 +162,13 @@ var playState = {
 
                 // Create middle sphere
                 this.drawGraphics(0x9900CC, 100);
-                this.sprite[0] = this.group.create(game.world.centerX, game.world.centerY);
+                this.sprite[0] = this.group.create(game.world.centerX-200, game.world.centerY-200);
                 game.physics.p2.enable(this.sprite[0], false);
                 this.sprite[0].addChild(this.graphics);
                 this.sprite[0].health = this.HP;
                 this.sprite[0].maxHealth = this.MAXHEALTH;
                 this.sprite[0].body.setCircle(50);
-                this.sprite[0].body.mass = 5;
+                this.sprite[0].body.mass = 2;
                 this.sprite[0].name = 'boss';
                 //this.sprite.body.allowRotation = true;
                 this.sprite[0].body.collideWorldBounds = false;
@@ -421,7 +421,7 @@ var playState = {
                                   color: '#FFFFFF'
                                 },
                                 bar: {
-                                  color: '#CC0066'
+                                  color: '#9900CC'//'#CC0066'
                                 },
                                 animationDuration: 200,
                                 flipped: false
@@ -439,6 +439,8 @@ var playState = {
 
     update: function() {
         
+        game.world.wrap(this.ship.sprite.body);
+
         game.world.wrap(this.boss.sprite[0].body);
 
         this.boss.innerGroup.forEachExists(function(sprite) {
@@ -447,7 +449,7 @@ var playState = {
 
         this.boss.outerGroup.forEachExists(function(sprite) {
             game.world.wrap(sprite.body);
-        }); 
+        });  
 
         this.winOrLose();
 
