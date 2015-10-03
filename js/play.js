@@ -26,6 +26,8 @@ var playState = {
 
 		ship: {
 		    sprite: null,
+            spriteExpl: null,
+            shipDeadAnim: false,
 		    hp: 100,
 		    shipScale: 0.3,
 		    proximitySize: 300,
@@ -40,6 +42,12 @@ var playState = {
 		        this.sprite.body.setCollisionGroup(playState.collision.ship);
 		        this.sprite.body.collides(playState.collision.boss, this.collision, this);
 		        this.proximityCircle = new Phaser.Circle(this.sprite.body.x, this.sprite.body.y, this.proximitySize);
+
+                this.spriteExpl = game.add.sprite(0, 0, 'shipExplosion');
+                this.spriteExpl.anchor.x = 0.5;
+                this.spriteExpl.anchor.y = 0.5;
+
+                this.spriteExpl.animations.add('shipExpl', [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15], true);
 		    },
 		    collision: function(body1, body2) {
 
@@ -52,17 +60,21 @@ var playState = {
 		            sprite.children[0].tint = 150000;//0xCC0000;
 		            game.time.events.add(Phaser.Timer.SECOND * 5, playState.selfDestruct, this, sprite);
 		        }
-		    }
+		    },
+            shipDies: function(){
+                this.shipDeadAnim = true;
+                this.spriteExpl.reset(this.sprite.body.x, this.sprite.body.y);
+                this.spriteExpl.scale.setTo(3, 3);
+                this.spriteExpl.animations.play('shipExpl', 16, false, true);
+            }
 
 		}, 
 		collision: {
 		    bullet: null,
-		    enemy: null,
 		    boss: null,
 		    ship: null,
 		    init: function () {
 		        this.bullet = game.physics.p2.createCollisionGroup();
-		        this.enemy = game.physics.p2.createCollisionGroup();
 		        this.ship = game.physics.p2.createCollisionGroup();
 		        this.boss = game.physics.p2.createCollisionGroup();
 		    }
@@ -372,7 +384,10 @@ var playState = {
     },
 
     winOrLose: function(){
-        if (!this.ship.sprite.alive) this.Lose();
+        if (!this.ship.sprite.alive && !this.ship.shipDeadAnim){
+            playState.ship.shipDies();
+            game.time.events.add(Phaser.Timer.SECOND * 4, this.Lose, this);
+        }
         if (!this.boss.sprite[0].alive) this.Win();
     },
 
@@ -481,8 +496,6 @@ var playState = {
             playState.boss.revive(0);
         } 
 
-
-
         
       if (this.cursors.left.isDown)
         {
@@ -525,6 +538,7 @@ var playState = {
 		game.state.start('win');
 	},
 	Lose: function(){
+        this.ship.shipDeadAnim = false;
 		game.state.start('lose');
 	}
 };
